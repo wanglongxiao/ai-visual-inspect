@@ -1,0 +1,164 @@
+<!-- Copyright (c) 2026 Alex Wang -->
+<!-- @author Alex Wang <https://github.com/wanglongxiao> -->
+<!-- @contact https://www.linkedin.com/in/alexwanglx/ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Construction Safety Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/app.css" />
+</head>
+<body>
+  <div class="min-h-screen bg-gray-50 flex">
+
+    <!-- Left Sidebar -->
+    <div class="w-1/6 bg-white shadow-lg border-r border-gray-200 p-4">
+      <div class="flex items-center gap-2 mb-6">
+        <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V6a2 2 0 0 1 4 0v0"/><path d="M4 15h16"/><path d="M10 15v-1h4v1"/></svg>
+        <h2 class="text-lg font-bold text-gray-900">Sites</h2>
+      </div>
+      <nav id="site-buttons" class="space-y-2">
+        {% for name in site_names %}
+        <button
+          data-site-index="{{ loop.index0 }}"
+          class="w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 hover:bg-gray-100"
+        >
+          {{ name }}
+        </button>
+        {% endfor %}
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8 relative">
+
+      <!-- Header with Alert Bell -->
+      <div class="flex items-center justify-between mb-8">
+        <h1 id="site-title" class="text-3xl font-bold text-gray-900">
+          {{ site_names[0] if site_names else '' }} - Safety Monitor
+        </h1>
+        <div class="flex items-center gap-4">
+
+          <!-- Alert Bell -->
+          <div class="relative">
+            <button
+              id="alert-bell"
+              class="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
+            >
+              <svg class="h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span id="alert-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" style="display:none;">0</span>
+            </button>
+
+            <!-- Alert Dropdown -->
+            <div id="alert-dropdown" class="absolute right-0 top-full mt-2 w-96 bg-white/90 backdrop-blur-md rounded-lg shadow-xl border border-gray-200 z-30 max-h-[80vh] overflow-hidden flex flex-col" style="display:none;">
+              <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                  <svg class="h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                  Safety Alerts
+                </h3>
+                <span id="alert-count-label" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  0 Issues
+                </span>
+              </div>
+              <div id="alert-list" class="overflow-y-auto p-2 space-y-2">
+                <div class="p-8 text-center text-gray-500 text-sm">
+                  <svg class="h-8 w-8 mx-auto mb-2 text-green-500 opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                  No safety hazards detected.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <button
+            id="btn-refresh"
+            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            Refresh
+          </button>
+          <button
+            id="btn-analyze"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            Big Model Detect
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Overlay -->
+      <div id="stats-overlay" class="fixed bottom-4 left-4 z-40 bg-black/60 backdrop-blur-md text-white p-4 rounded-lg shadow-lg border border-white/20" style="display:none;">
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-2">Performance Stats</h3>
+        <div class="space-y-1 font-mono text-sm">
+          <div class="flex justify-between gap-4">
+            <span>Total Tokens:</span>
+            <span id="stats-tokens" class="text-green-400">0</span>
+          </div>
+          <div class="flex justify-between gap-4">
+            <span>Total Time:</span>
+            <span id="stats-time" class="text-blue-400">0.00s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="loading-spinner" class="flex items-center justify-center h-64" style="display:none;">
+        <div class="text-center">
+          <svg class="h-12 w-12 text-blue-500 animate-spin mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <p class="text-gray-500">Verifying and loading images...</p>
+        </div>
+      </div>
+
+      <!-- Image Grid -->
+      <div id="image-grid" class="grid grid-cols-5 gap-4"></div>
+
+      <!-- Safety Hazard Logs -->
+      <div id="hazard-logs" class="mt-8 bg-white rounded-lg shadow p-6" style="display:none;">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+          <svg class="h-5 w-5 text-red-600 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          Safety Hazard Logs
+        </h2>
+        <div id="hazard-log-list" class="space-y-2"></div>
+      </div>
+
+      <!-- Image Detail Modal -->
+      <div id="image-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-8" style="display:none;">
+        <div class="bg-white rounded-lg shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div class="p-4 border-b flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <h3 id="modal-title" class="text-lg font-bold text-gray-900 flex items-center">
+                <svg class="h-5 w-5 mr-2 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                Image Monitor
+              </h3>
+            </div>
+            <button id="modal-close" class="p-1 hover:bg-gray-100 rounded-full">
+              <svg class="h-6 w-6 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="relative flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-4">
+            <div class="relative inline-block">
+              <img id="modal-image" src="" alt="Detail" class="max-w-full max-h-[70vh] object-contain" />
+              <div id="modal-bbox" class="absolute border-4 border-red-600 shadow-[0_0_10px_rgba(255,0,0,0.5)]" style="display:none;"></div>
+            </div>
+          </div>
+
+          <div id="modal-result" class="p-6 border-t bg-gray-50 border-gray-100 text-center text-gray-500">
+            Analysis not yet performed on this image.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    window.__IMAGE_PAGE_SIZE__ = {{ image_page_size }};
+    window.__SITE_NAMES__ = {{ site_names | safe }};
+  </script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
