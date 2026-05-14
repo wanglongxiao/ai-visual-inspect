@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Alex Wang
+# @author Alex Wang <https://github.com/wanglongxiao>
+# @contact https://www.linkedin.com/in/alexwanglx/
+
+app:
+  name: Construction Safety Monitor
+  version: 1.0.0
+
+llm:
+  provider: BytePlus Ark
+  apiUrl: https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions
+  apiKey: your_api_key_here
+  model: seed-2-0-lite-260228
+  thinking:
+    level: basic
+    type: enabled
+
+ui:
+  imagePageSize: 15
